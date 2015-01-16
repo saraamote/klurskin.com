@@ -1,0 +1,15 @@
+{% if settings.prod_feat_img_beside %}
+{% assign prod_bg_image = false %}
+
+{% else %}
+
+{% if settings.head_img_prod_which == 'feat' %}
+{% assign prod_bg_image = product.featured_image %}
+{% elsif settings.head_img_prod_which == 'sec' %}
+{% assign prod_bg_image = product.images[1] %}
+{% else %}
+{% for image in product.images %}
+{% if image.alt contains 'background' %}{% assign prod_bg_image = image %}{% endif %}
+{% endfor %}
+{% endif %}
+{% endif %}

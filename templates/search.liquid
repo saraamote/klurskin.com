@@ -1,0 +1,80 @@
+{% paginate search.results by settings.coll_num_prods %}
+<div class="central align-center">
+
+  <div class="chunkform">
+    <form action="/search" method="get" class="search-form" role="search">
+      {% if settings.search_prods_only %}<input type="hidden" name="type" value="product">{% endif %}
+
+      <div class="large_form inline-input-button align-center">
+        <input type="text" name="q" value="{{ search.terms | escape }}" />
+        <input type="submit" value="{{ settings.txt_search }}" />
+      </div>
+    </form>
+  </div>
+  {% if search.performed %}
+  {% if search.results_count == 0 %}
+  <p>Your search for "{{ search.terms }}" did not yield any results.</p>
+  {% else %}
+  <p>We found {{ search.results_count }} {{ search.results_count | pluralize: 'result','results' }}</p>
+  {% endif %}
+  {% endif %}
+</div>
+
+{% comment %}
+search.performed is false when accessing the /search page without a 'q' parameter set
+in the URL. A shop-owner can link to the /search page from one of his link lists.
+It is important to show a search form on that page if search.performed is false.
+{% endcomment %}
+
+{% if search.performed %}
+
+{% comment %}
+Common pitfall to avoid: search.results should never be accessed before the opening
+paginate tag. Move the opening and closing paginate tags to the very top and bottom of your
+search.liquid template if you need to.
+If you fail to do the above, the pagination of search results will be broken.
+search.results_count is fine to access in or out of the paginate block.
+{% endcomment %}
+
+{% if search.results_count > 0 %}
+
+<div class="side-gutter double-gutter">
+  <div class="product-list {% if settings.coll_layout contains 'dynamic' %}jiggly-split {{ settings.coll_layout }}{% endif %}">
+    {% if settings.coll_layout contains 'rows' %}
+    {% assign product_class = 'column ' | append: settings.coll_layout | remove: 'rows-' %}
+    {% endif %}
+
+    {% for item in search.results %}
+      {% if item.featured_image %}
+        {% assign product = item %}
+        {% include 'product-block' %}
+      {% else %}
+        <div class="product-block {{ product_class }} content">
+          <h4>{{ item.title | link_to: item.url }}</h4>
+          <div class="rte">
+            <p>{{ item.content | strip_html | truncatewords: 30 | highlight: search.terms }}</p>
+            <p>{{ 'Read more &rarr;' | link_to: item.url }}</p>
+          </div>
+        </div>
+        {% if product_class contains 'quarter' %}
+        {% cycle 'products': '','','','<div class="er"></div>' %}
+        {% elsif product_class contains 'third' %}
+        {% cycle 'products': '','','<div class="er"></div>' %}
+        {% elsif product_class contains 'half' %}
+        {% cycle 'products': '','<div class="er"></div>' %}
+        {% endif %}
+        {% endif %}
+    {% endfor %}
+  </div>
+</div>
+
+{% endif %}
+
+{% if paginate.pages > 1 %}
+<div class="pagination central content {{ settings.coll_infiniscroll }}">
+  {{ paginate | default_pagination }}
+</div>
+{% endif %}
+
+{% endif %}
+{% endpaginate %}

@@ -1,0 +1,308 @@
+{% comment %}
+ADDING SHOPIFY'S REVIEWS? LOOK NO FURTHER!
+
+This theme supports the Product Reviews app out of the box.
+https://apps.shopify.com/product-reviews
+
+Change 'false' to 'true' on the line below, to show them.
+{% endcomment %}
+{% assign show_product_reviews = false %}
+
+
+{% assign featured_image = product.selected_or_first_available_variant.featured_image | default: product.featured_image %}
+<div class="central wide relative" itemscope itemtype="http://schema.org/Product">
+  {% if settings.prod_feat_img_beside %}
+  <div class="large-product-image {% if product.tags contains 'meta-layout-right' %}left{% endif %}">
+    {{ featured_image | product_img_url: '1024x1024' | img_tag: featured_image.alt }}
+  </div>
+  {% endif %}
+
+  <div class="inner product-detail {% if product.tags contains 'meta-layout-right' %}right{% endif %}{% if product.tags contains 'meta-layout-middle' %}middle{% endif %}">
+    <form action="/cart/add" method="post" enctype="multipart/form-data" class="feedback-{{ settings.cart_add }}">
+      <div class="content bottomless halfgutter">
+        <meta itemprop="url" content="{{ shop.url }}{{ product.url }}" />
+        <meta itemprop="image" content="{{ product.featured_image.src | product_img_url: 'grande' }}" />
+        {% for variant in product.variants %}
+        <div itemprop="offers" itemscope itemtype="http://schema.org/Offer">
+          <meta itemprop="price" content="{{ variant.price | money_without_currency | strip_html }}" />
+          <meta itemprop="priceCurrency" content="{{ shop.currency }}" />
+          {% if product.available %}
+          <link itemprop="availability" href="http://schema.org/InStock" />
+          {% else %}
+          <link itemprop="availability" href="http://schema.org/OutOfStock" />
+          {% endif %}
+        </div>
+        {% endfor %}
+
+
+        <h1 class="page-title" itemprop="name">{{ product.title }}</h1>
+
+        {% if settings.prod_show_desc %}
+        <div class="rte" itemprop="description">
+          {{ product.description }}
+        </div>
+        {% else %}
+
+        {% assign description = product.description %}
+        {% if description contains '<aside>' and description contains '</aside>' %}
+        {% assign split_desc_1 = description | split: '<aside>' %}
+        {% assign split_desc_2 = split_desc_1.last | split: '</aside>' %}
+        {% assign description = split_desc_1.first | append: split_desc_2.last %}
+        <p>{{ split_desc_2.first }}</p>
+        {% endif %}
+
+        <p>
+          <a href="#" data-modal-target="#product-description">{{ settings.txt_deets }}</a>
+        </p>
+        <div id="product-description" class="hidden">
+          <div class="rte" itemprop="description">
+            {{ description }}
+          </div>
+        </div>
+        {% endif %}
+
+        {% for tag in product.tags %}
+        {% if tag contains 'meta-link-' %}
+        {% assign hdl = tag | remove: 'meta-link-' %}
+        {% assign page = pages[hdl] %}
+        <p><a href="#" data-modal-target="#page-{{hdl}}">{{ page.title }}</a></p>
+        <div id="page-{{hdl}}" class="hidden">
+          <h1>{{ page.title }}</h1>
+          <div class="rte">
+            {{ page.content }}
+          </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+
+
+        <div id="mega-sharing" class="hidden">
+          <div class="mega-sharing">
+            {% include 'social-sharing' with product %}
+          </div>
+        </div>
+
+
+        {% if product.available %}
+        <div class="product-form">
+          {% if settings.prod_show_singleopt and product.variants.size == 1 %}
+          <p>
+            {% for option in product.options %}
+            {% unless product.variants.first.options[forloop.index0] contains 'Default' %}
+            {{ product.variants.first.options[forloop.index0] }}<br/>
+            {% endunless %}
+            {% endfor %}
+          </p>
+          {% endif %}
+
+          {% if settings.prod_show_qty %}
+          <div class="option-quantity">
+            <label for="quantity">Qty:</label>
+            <input class="select-on-focus" id="quantity" name="quantity" value="1" />
+          </div>
+          {% else %}
+          <input type="hidden" id="quantity" name="quantity" value="1" />
+          {% endif %}
+
+          {% assign hide_default_title = false %}
+          {% if product.variants.size == 1 and product.variants.first.title contains 'Default' %}
+          {% assign hide_default_title = true %}
+          {% endif %}
+
+          <div id="product-variants" class="{% if hide_default_title %} hidden{% endif %}">
+            <select id="product-select" name="id" class="hidden">
+              {% for variant in product.variants %}
+              <option value="{{ variant.id }}" {% if variant == product.selected_or_first_available_variant %} selected="selected" {% endif %}>{{ variant.title }} - {{ variant.price | money }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+        </div><!-- .product-form -->
+
+        <div id="backorder" class="hidden">
+          <p>{{ settings.txt_backorder | replace: '%s', '<span id="selected-variant"></span>' }}</p>
+        </div>
+
+        {% else %}
+        <h5>{{ settings.txt_produnavailable }}</h5>
+        {% endif %}
+      </div><!-- /.content -->
+
+      {% assign first_variant = product.selected_or_first_available_variant %}
+
+      <button name="add" id="add"{% unless product.available %} disabled=disabled{% endunless %}>
+        <span class="icon">{{ settings.txt_add }}</span>
+        <span class="price">{{ first_variant.price | money }}  &mdash;</span>
+      </button>
+    </form>
+
+    <div class="label-row cf">
+
+      <a class="share-link" href="#" data-modal-target="#mega-sharing">{{ settings.txt_share_l }}</a>
+
+    </div>
+
+	{% comment %} Are we going to show the thumbnail/gallery? {% endcomment %}
+    {% if settings.prod_gall_solo or product.images.size > 1 %}
+
+    {% comment %} Decide which image to use for the gallery thumbnail. Depends on the background. {% endcomment %}
+    {% include 'get-product-bg-image' %}
+
+    {% comment %} One image, only one choice {% endcomment %}
+    {% if product.images.size == 1 %}
+    {% assign thumb_bg = product.featured_image %}
+
+    {% comment %} Not using a background, use second image {% endcomment %}
+    {% elsif settings.prod_feat_img_beside %}
+    {% assign thumb_bg = product.images[1] %}
+
+    {% comment %} If the background is not the first image, we choose the first, or variant {% endcomment %}
+    {% elsif prod_bg_image.src != featured_image.src %}
+    {% assign thumb_bg = featured_image %}
+
+    {% comment %} If the background is the featured image, we choose the second image (assumes variant image poses no conflict) {% endcomment %}
+    {% else %}
+    {% assign thumb_bg = product.images[1] %}
+    {% endif %}
+
+    {% if settings.head_img_prod_hidefromgall and product.images.size == 1 and thumb_bg.src == prod_bg_image.src %}
+    {% comment %} Do not show gallery if we are hiding the background image from it, and that's the only image {% endcomment %}
+    {% else %}
+    <a href="#" class="show-gallery {% if show_product_reviews %}flat-bottom{% endif %}" {% if settings.prod_gall_link_usebg %}style="background-image:url({{ thumb_bg | product_img_url: 'grande' }})"{% endif %}>
+      {% unless settings.prod_gall_link_usebg %}
+      {{ thumb_bg | product_img_url: 'grande' | img_tag: thumb_bg.alt }}
+      {% endunless %}
+      <span class="link">
+        <i class="icon-gallery"></i>
+      </span>
+    </a>
+    {% comment %} Gallery is built on click, with javascript {% endcomment %}
+    <script>
+      $(function(){
+        $('.show-gallery').on('click', function(){
+          showThemeGallery(
+            {{ product.images | json }}, $(this).find('.link')
+            {% if settings.head_img_prod_hidefromgall %}, {{ prod_bg_image.src | json }}{% endif %}
+          );
+          return false;
+        });
+      });
+    </script>
+    {% endif %}
+    {% endif %}
+
+
+
+    {% if show_product_reviews %}
+    <div id="shopify-product-reviews" data-id="{{ product.id }}">{{ product.metafields.spr.reviews }}</div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="next-prev-page">
+  <span class="inner">
+    {% if collection.previous_product %}
+    <a class="prev" href="{{ collection.previous_product }}" data-fill-with-product="{{ collection.previous_product | split: '/' | last }}"><script type="text/template"><img src="[img:medium]" title="[title]" /><i class="icon-{{ settings.prod_nextprev_mode }}-left"></i></script></a>
+    {% endif %}
+    {% if collection.next_product %}
+    <a class="next" href="{{ collection.next_product }}" data-fill-with-product="{{ collection.next_product | split: '/' | last }}"><script type="text/template"><i class="icon-{{ settings.prod_nextprev_mode }}-right"></i><img src="[img:medium]" title="[title]" /></script></a>
+    {% endif %}
+  </span>
+</div>
+
+
+{% if product.available and product.variants.size > 1 %}
+<script>
+function plainTextButtonWrap(str) { return '<span class="plain-text">'+str+'</span>'; }
+
+var selectCallback = function(variant, selector) {
+
+  if (variant) {
+    // Variant images
+    var $galleryCont = $('.show-gallery');
+    if(variant.featured_image && $galleryCont.length) {
+      var newImgUrl = Shopify.resizeImage(variant.featured_image.src, '{% if settings.prod_feat_img_beside %}1024x1024{% else %}large{% endif %}');
+      $('<img/>').attr('src', newImgUrl).imagesLoaded(function(){
+        {% if settings.prod_feat_img_beside %}
+        $('.large-product-image img').attr('src', newImgUrl);
+        {% else %}
+        {% if settings.prod_gall_link_usebg %}
+        $galleryCont.css('background-image', 'url('+newImgUrl+')');
+        {% else %}
+        $galleryCont.find('img').attr('src', newImgUrl);
+        {% endif %}
+        {% endif %}
+      });
+    }
+
+    // Selected a valid variant that is available.
+    if (variant.available) {
+
+      // Enabling add to cart button.
+      var addBtnText = '<span class="price">' + Shopify.formatMoney(variant.price, {{ shop.money_format | json }}) + '</span>';
+      if ( variant.compare_at_price > variant.price ) {
+        jQuery('#add').addClass('on-sale');
+        addBtnText += ' <span class="pre-sale-price">' + Shopify.formatMoney(variant.compare_at_price, {{ shop.money_format | json }}) + '</span>';
+      } else {
+        jQuery('#add').removeClass('on-sale');
+      }
+      addBtnText = '<span class="icon">' + {{ settings.txt_add | json }} + '</span>' + addBtnText;
+      jQuery('#add').removeClass('disabled').removeAttr('disabled').html(addBtnText);
+
+      // If item is backordered yet can still be ordered, we'll show special message.
+      if (variant.inventory_management && variant.inventory_quantity <= 0) {
+        jQuery('#selected-variant').html({{ product.title | json }}{% unless hide_default_title %} + ' - ' + variant.title{% endunless %});
+        jQuery('#backorder').removeClass("hidden");
+      } else {
+        jQuery('#backorder').addClass("hidden");
+      }
+
+    } else {
+      // Variant is sold out.
+      jQuery('#backorder').addClass('hidden');
+      jQuery('#add').html(plainTextButtonWrap({{ settings.txt_produnavailable | json }})).addClass('disabled').attr('disabled', 'disabled');
+    }
+
+  } else {
+    // variant doesn't exist.
+    var html = plainTextButtonWrap({{ settings.txt_unav | json }});
+    var anySelectsEmpty = $('.selector-wrapper select').filter(function(){ return $(this).val() == ''; }).length > 0;
+    if(anySelectsEmpty) {
+      html = plainTextButtonWrap({{ settings.txt_nooptschosen | json }});
+    }
+    jQuery('#backorder').addClass('hidden');
+    jQuery('#add').html(html).addClass('disabled').attr('disabled', 'disabled');
+  }
+
+};
+
+jQuery(function($) {
+
+  new Shopify.OptionSelectors('product-select', { product: {{ product | json }}, onVariantSelected: selectCallback, enableHistoryState: true });
+
+  // Add label if only one product option and it isn't 'Title'.
+  {% if product.options.size == 1 and product.options.first != 'Title' %}
+    $('.selector-wrapper:eq(0)').prepend('<label>{{ product.options.first }}</label>');
+  {% endif %}
+
+  {% if settings.prod_show_pick_a %}
+  {% for option in product.options %}
+  $('.single-option-selector:eq({{ forloop.index0 }})').prepend('<option value="">{{ settings.txt_pick }} {{ product.options[forloop.index0] }}</option>').val('').trigger('change');
+  {% endfor %}
+  {% endif %}
+
+  //Make sure dropdowns have labels with matching 'for' attribute
+  $('.product-form .selector-wrapper select').each(function(){
+    $(this).closest('.selector-wrapper').find('label').attr('for', $(this).attr('id'));
+  });
+
+  //Turn some inputs into clickable boxes
+  var toMakeClicky = ',' + {{ settings.prod_clicky_opt_names | json }} + ',';
+   $('.product-form .selector-wrapper select').filter(function(){
+     return toMakeClicky.indexOf(',' +$(this).siblings('label').html() + ',') >= 0;
+   }).each(function(){
+     $(this).find('option[value=""]').remove(); //Remove 'Pick a' option, if exists
+   }).clickyBoxes().parent().addClass('has-clickyboxes');
+});
+</script>
+{% endif %}

@@ -1,0 +1,759 @@
+/*
+
+custom fonts and reset
+
+*/
+
+#page-content .content {
+
+  min-height: 450px;
+
+}
+
+body {
+
+  border-top: 2px solid #000000;
+
+}
+
+body, p a {
+
+  font-family: "brandon-grotesque",sans-serif;
+  letter-spacing: 0.01em;
+  font-size: 14px;
+
+}
+
+h1 {
+
+  font-family: "brandon-grotesque", sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.035em;
+  font-size: 18px;
+
+}
+
+#page-content {
+
+  padding: 135px 0;
+
+}
+
+#page-content .central.wide {
+
+  width: 1000px;
+
+}
+
+a:hover {
+
+  text-decoration: none !important;
+
+}
+
+
+/* buttons */
+
+button {
+
+  outline: none;
+
+}
+
+button[disabled].confirmation, input[type=submit][disabled].confirmation {
+
+  background: rgba( 243 , 215 , 203 , .9 );
+  color: #000;
+
+}
+
+
+
+
+/*
+
+header and logo
+
+*/
+
+#site-control #logo img {
+
+  width: 130px;
+
+}
+
+#site-control {
+
+  background: rgba( 255 , 255 , 255 , 0.5 );
+  padding: 10px 0;
+
+}
+
+#site-control .logo-upper #logo {
+
+  text-transform: uppercase;
+
+}
+
+/* navigation */
+
+#site-control a {
+
+  text-transform: uppercase;
+
+}
+
+
+
+
+/*
+
+popup menu
+
+*/
+
+/* overlay background */
+
+.theme-modal {
+
+  background: rgba( 243 , 215 , 203 , .9 );
+
+}
+
+/* content */
+
+.theme-modal > .inner {
+
+
+  padding: 100px 0 50px;
+
+}
+
+/* close */
+
+.theme-modal .modal-actions {
+
+  top: 30px;
+
+}
+
+.icon-cross:before {
+
+  font-family: "garamond-premier-pro", serif;
+  letter-spacing: 0.035em;
+  padding: 0 0 30px 0;
+  font-style: italic;
+  content: "close";
+  font-size: 18px;
+
+}
+
+/* navigation and social */
+
+#page-menu .main-nav ul,
+.social-links span {
+
+
+  font-family: "brandon-grotesque",sans-serif;
+  text-transform: uppercase;
+  line-height: 26px;
+
+}
+
+/* custom divider */
+
+#page-menu .posh-divider .posh1,
+#page-menu .posh-divider .posh2 {
+
+  margin-top: 22px;
+  width: 35%;
+
+}
+
+.posh-divider img {
+
+  height: 70px;
+  width: 70px;
+
+}
+
+/* copyright */
+
+p.copyright a,
+p.copyright,
+.builtwithlove,
+.builtwithlove a,
+.builtwithlove sup {
+
+  font-family: "garamond-premier-pro", serif;
+  color: rgba( 0 , 0 , 0 , .75 );
+  letter-spacing: 0.035em;
+  vertical-align: bottom;
+  font-style: italic;
+  line-height: 18px;
+  font-size: 12px;
+
+}
+
+
+
+/*
+
+homepage
+
+*/
+
+#bespoke-logo {
+
+  position: fixed;
+  width: 120px;
+  top: 50px;
+  right: 5%
+
+}
+
+.bespoke.central {
+
+color: rgba( 255 , 255 , 255 , 0.75 );
+letter-spacing: .075em;
+position: absolute;
+line-height: 20px;
+font-size: 20px;
+bottom: 20%;
+left: 5%;
+
+}
+
+.bespoke.central .home {
+
+  margin: 5px;
+  padding: 0px;
+
+}
+
+.bespoke.central .discover {
+
+  font: 24px / 40px "garamond-premier-pro", serif;
+  background: rgba( 255 , 255 , 255 , .95 );
+  border: 1px solid #000;
+  letter-spacing: 0.035em;
+  display: inline-block;
+  text-decoration: none;
+  margin: 30px 0 0 0;
+  font-style: italic;
+  padding: 5px 30px;
+  color: #000;
+  opacity: 0.75;
+  transition: 600ms ease-in-out;
+
+}
+
+.bespoke.central .discover:hover {
+
+  background: rgba( 243 , 215 , 203 , .9 );
+  color: #000;
+
+}
+
+
+
+
+/*
+
+pages
+
+*/
+
+#page-content .bespoke-page.central.content .rte,
+#page-content .bespoke-page.central.content {
+
+  line-height: 28px;
+  max-width: 800px;
+  font-size: 16px;
+  padding: 30px;
+  width: 100%;
+
+}
+
+.bespoke-page {
+
+  color: rgba( 255 , 255 , 255 , 0.75 );
+  letter-spacing: .075em;
+  line-height: 21px;
+  font-size: 14px;
+
+}
+
+.bespoke-page-content {
+
+  position: absolute;
+  bottom: 10%;
+  width: 45%;
+  right: 5%;
+
+}
+
+/*
+
+collection page
+
+*/
+
+.caption.upper a,
+.caption.lower a {
+
+  font-family: "brandon-grotesque",sans-serif;
+  letter-spacing: 0.035em;
+  font-style: italic;
+  font: 18px/32px;
+
+}
+
+.product-block.caption-over-hover .price,
+.caption.lower.price {
+
+  font-family: "garamond-premier-pro", serif;
+  letter-spacing: 0.035em;
+  font-style: italic;
+
+}
+
+.product-block .image a,
+.collection-block .image a {
+
+  box-shadow: 0px 0px 2px rgba( 0 , 0 , 0 , 0.25 );
+
+}
+
+
+
+
+/*
+
+product page
+
+*/
+
+/* product title*/
+
+.product-detail h1 {
+
+  font-family: "garamond-premier-pro", serif;
+  text-transform: capitalize;
+  letter-spacing: 0.035em;
+  padding: 0 0 30px 0;
+  font-style: italic;
+  font-size: 24px;
+
+}
+
+/* product description */
+
+.inner.product-detail > .content.halfgutter {
+
+  padding: 0;
+
+}
+
+#page-content .central.wide .inner {
+
+  width: 50%;
+
+}
+
+.rte p {
+
+  margin: 10px 0;
+
+}
+
+/* product form */
+
+.product-form p,
+.product-form {
+
+  padding: 0;
+  margin: 0;
+
+}
+
+/* add to cart button */
+
+.product-detail #add {
+
+  font-family: "garamond-premier-pro", serif;
+  padding: 15px 20px 10px 30px;
+  letter-spacing: 0.035em;
+  text-transform: none;
+  font-size: 24px;
+  margin: 0;
+
+}
+
+/* share button */
+
+.product-detail .label-row {
+
+  font-family: "garamond-premier-pro", serif;
+  letter-spacing: 0.035em;
+  font-style: italic;
+  font-size: 16px;
+  padding: 0 20px;
+  color: #f3d7cb;
+
+}
+
+/* product image */
+
+.large-product-image {
+
+  position: relative;
+  max-width: 350px;
+  left: initial;
+  float: right;
+  right: 30px;
+
+}
+
+.large-product-image img {
+
+  box-shadow: 0px 0px 2px rgba( 0 , 0 , 0 , 0.25 );
+
+}
+
+/* prev and next icons */
+
+.next-prev-page .prev,
+.next-prev-page .next {
+
+  display: none;
+
+}
+
+
+/*
+
+cart page
+
+*/
+
+.bespoke-cart {
+
+  background: url(klurskin-drawing.png) bottom left no-repeat;
+  background-size: 400px;
+
+}
+
+.bespoke-cart .bespoke.central.content {
+
+  width: 100% !important;
+  position: relative;
+  bottom: auto;
+  right: auto;
+  left: auto;
+
+}
+
+.bespoke-cart h1 {
+
+  display: none;
+
+}
+
+.bespoke-cart .bespoke.central.content,
+.bespoke-cart .bespoke.central.content h2,
+.bespoke-cart .bespoke.central.content p,
+.bespoke-cart .bespoke.central.content a {
+
+  color: #000000;
+
+}
+
+/* upper cart */
+
+.bespoke-cart .update-continue input[type=submit],
+.bespoke-cart .update-continue a {
+
+  font-family: "brandon-grotesque", sans-serif;
+  text-transform: uppercase;
+  background: transparent;
+  letter-spacing: 0.035em;
+  padding: 15px 10px;
+  font-size: 12px;
+
+}
+
+.bespoke-cart .update-continue input[type=submit]:hover {
+
+  background: transparent;
+
+}
+
+.bespoke-cart-span {
+
+  font-family: "garamond-premier-pro", serif;
+  letter-spacing: 0.035em;
+  font-style: italic;
+
+}
+
+.bespoke-cart-product.col-desc,
+.cart-list .remove {
+
+  font-family: "garamond-premier-pro", serif;
+  letter-spacing: 0.035em;
+  font-style: italic;
+  font-size: 16px;
+
+}
+
+.bespoke-cart-product.col-desc .title {
+
+  padding-bottom: 10px;
+  font-size: 18px;
+
+}
+
+/* lower cart */
+
+.under-cart .subtotal {
+
+  font-family: "garamond-premier-pro", serif;
+  letter-spacing: 0.035em;
+  font-style: italic;
+
+}
+
+.bespoke-cart input[type=submit] {
+
+  font-family: "garamond-premier-pro", serif;
+  padding: 15px 20px 10px 30px;
+  background: transparent;
+  letter-spacing: 0.035em;
+  text-transform: none;
+  max-width: 430px;
+  font-size: 24px;
+
+}
+
+.bespoke-cart input[type=submit]:hover {
+
+  background: rgba( 243 , 215 , 203 , .9 );
+
+}
+
+.bespoke-cart textarea {
+
+  background: transparent;
+
+}
+
+p.comment,
+p.note-area label {
+
+  font-family: "brandon-grotesque", sans-serif;
+  text-transform: uppercase;
+  background: transparent;
+  letter-spacing: 0.035em;
+  font-size: 12px;
+  display: block;
+  margin: 10px;
+
+}
+
+/* empty cart */
+
+.bespoke-cart .bespoke.central.content .empty-cart {
+
+  font-family: "brandon-grotesque", sans-serif;
+  text-transform: uppercase;
+  background: transparent;
+  letter-spacing: 0.035em;
+  font-size: 14px;
+  display: block;
+  margin: 20px;
+
+}
+
+.bespoke-cart .bespoke.central.content .keep-browsing,
+.bespoke-cart .bespoke.central.content .keep-browsing a {
+
+  font-family: "garamond-premier-pro", serif;
+  letter-spacing: 0.035em;
+  font-style: italic;
+  font-size: 18px;
+
+}
+
+
+
+
+/*
+
+media queries
+
+*/
+
+/* home page */
+
+@media screen and (max-width: 880px) {
+
+  .bespoke.central {
+
+    font-size: 18px;
+
+  }
+
+}
+
+@media screen and (max-width: 500px) {
+
+  #bespoke-logo {
+
+    width: 90px;
+    top: 2.5%;
+
+  }
+
+  .bespoke.central {
+
+    background: rgba( 255 , 255 , 255 , 0.80 );
+    letter-spacing: .05em;
+    line-height: 18px;
+    text-align: center;
+    line-height: 16px;
+    padding: 5px 10px;
+    position: fixed;
+    font-size: 14px;
+    color: #000;
+    bottom: 0;
+    right: 0;
+    left: 0;
+
+  }
+
+  .bespoke.central .discover {
+
+    font: 20px / 30px "garamond-premier-pro", serif;
+    border: 1px solid #000;
+    margin: 10px 0 10px 0;
+    font-style: italic;
+    color: #000;
+
+  }
+
+}
+
+/* product page */
+
+@media screen and (max-width: 767px) {
+
+  .large-product-image {
+
+    position: static;
+    max-width: none;
+    float: none;
+    width: 100%;
+    right: 0;
+    left: 0;
+
+  }
+
+  #page-content .central.wide .inner {
+
+    width: 100%;
+
+  }
+
+}
+
+/* collection page */
+
+@media screen and (max-width: 959px) {
+
+  .product-block.caption-over-hover .title,
+  .caption-over-hover.collection-block .title,
+  .product-block.caption-over-hover .price,
+  .caption-over-hover.collection-block .price {
+
+    -webkit-transition: opacity 200ms,margin 200ms ease-in-out;
+    -ms-transition: opacity 200ms,margin 200ms ease-in-out;
+    -moz-transition: opacity 200ms,margin 200ms ease-in-out;
+    -o-transition: opacity 200ms,margin 200ms ease-in-out;
+    transition: opacity 200ms,margin 200ms ease-in-out;
+    position: absolute;
+    z-index: 5;
+    opacity: 0;
+
+  }
+
+}
+
+@media screen and (max-width: 500px) {
+
+  .product-block.caption-over-hover .title,
+  .caption-over-hover.collection-block .title,
+  .product-block.caption-over-hover .price,
+  .caption-over-hover.collection-block .price {
+
+    position: relative;
+    display: block;
+    opacity: 1;
+    padding: 0;
+    left: auto;
+    right: auto;
+
+  }
+
+}
+
+@media screen and (max-width: 767px) {
+
+  .scrolled-down #site-control {
+
+    background: rgba(255 , 255 , 255 , 0.5);
+
+  }
+
+}
+
+/* pages */
+
+@media screen and (max-width: 767px) {
+
+  body:not(.template-index) #page-bg {
+
+    overflow: visible !important;
+    position: relative !important;
+    display: block !important;
+    height: auto !important;
+    width: 100% !important;
+
+  }
+
+  body:not(.template-index) #page-bg img {
+
+    top: 0 !important;
+    position: relative!important;
+
+  }
+
+  body:not(.template-index) #page-content {
+
+    padding: 35px 0;
+
+  }
+
+  .bespoke-page-content {
+
+    position: relative;
+    display: block;
+    bottom: auto;
+    right: auto;
+    padding: 5%;
+    width: 100%;
+    color: #000;
+
+  }
+
+}

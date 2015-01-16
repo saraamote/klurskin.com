@@ -1,0 +1,60 @@
+{% comment %}
+ADDING SHOPIFY'S REVIEWS? LOOK NO FURTHER!
+
+This theme supports the Product Reviews app out of the box.
+https://apps.shopify.com/product-reviews
+
+Change 'false' to 'true' on the line below, to show them.
+{% endcomment %}
+{% assign show_product_reviews = false %}
+
+
+
+{% comment %}Is this product on sale?{% endcomment %}
+{% assign on_sale = false %}
+{% if product.compare_at_price > product.price %}
+  {% assign on_sale = true %}
+{% endif %}
+
+{% assign product_url = product.url | within: collection %}
+
+<div class="product-block{% unless product.available %} sold-out{% endunless %}{% if on_sale %} on-sale{% endif %} caption-{{ settings.coll_captionmode }} {% if product.tags contains 'meta-layout-right' %}layout-right{% endif %} {{ product_class }}" data-loop-index="{{forloop.index}}">
+
+  {% assign image_size = settings.coll_prod_img_size %}
+  {% for tag in product.tags %}
+  {% if tag contains 'meta-image-' %}{% assign image_size = tag | remove: 'meta-image-' %}{% endif %}
+  {% endfor %}
+  <div class="image">
+    <a href="{{ product_url }}">
+      {{ product.featured_image | product_img_url: image_size | img_tag: product.title }}
+
+      {% if product.compare_at_price > product.price %}
+      <span class="product-label sale">{{ settings.txt_sale | escape }}</span>
+      {% endif %}
+    </a>
+  </div>
+  <div class="caption upper">
+    <a href="{{ product_url }}" class="title">{{ product.title }}</a>
+  </div>
+  <div class="caption lower">
+    {% if settings.show_product_reviews %}
+    <span class="shopify-product-reviews-badge" data-id="{{ product.id }}"></span>
+    {% endif %}
+
+    <a href="{{ product_url }}" class="price">
+      {% if product.price_varies %}{{ settings.txt_from }}{% endif %}
+      {{ product.price | money }}
+      {% if on_sale %}<s class="compare-at-price">{{ product.compare_at_price | money }}</s>{% endif %}
+
+      {% unless product.available %}<div class="sold-out">Sold Out</div>{% endunless %}
+    </a>
+  </div>
+</div>
+
+{% if product_class contains 'quarter' %}
+{% cycle 'products': '','','','<div class="er"></div>' %}
+{% elsif product_class contains 'third' %}
+{% cycle 'products': '','','<div class="er"></div>' %}
+{% elsif product_class contains 'half' %}
+{% cycle 'products': '','<div class="er"></div>' %}
+{% endif %}

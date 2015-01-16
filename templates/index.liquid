@@ -1,0 +1,65 @@
+{% if settings.home_content_type == 'home_image_active' %}
+<div class="central">
+  <div id="large-logo">
+    <a href="{{ settings.home_image_url }}">
+      <img style="width:{{ settings.home_image_w }}px" src="{{ 'home_image.png' | asset_url }}" alt="{{ shop.name | escape }}" />
+    </a>
+  </div>
+</div>
+{% endif %}
+
+{% if settings.home_content_type == 'home_type_active' %}
+<div class="overlay-type overlay">
+  <div class="inner">
+    <div>
+      {% if settings.home_type_url != blank %}<a href="{{ settings.home_type_url }}">{% endif %}
+      <h1 class="line-1">{{ settings.home_type_1_txt }}</h1>
+      <h2 class="line-2">{{ settings.home_type_2_txt }}</h2>
+      {% if settings.home_type_url != blank %}</a>{% endif %}
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{% if settings.home_content_type == 'home_page_1_active' %}
+{% assign page = pages[settings.home_page_1] %}
+
+<div class="bespoke central {% if settings.home_content_fullwidth %}wide{% endif %}">
+
+  {{ page.content }}
+
+</div>
+
+{% endif %}
+
+
+{% if settings.home_content_type == 'home_prod_layout_active' %}
+<div class="side-gutter double-gutter">
+  <div class="product-list {% if settings.home_prod_layout contains 'dynamic' %}jiggly-split {{ settings.home_prod_layout }}{% endif %}">
+    {% if settings.home_prod_layout contains 'rows' %}
+    {% assign product_class = 'column ' | append: settings.home_prod_layout | remove: 'rows-' %}
+    {% endif %}
+
+    {% for product in collections[settings.home_prod_select].products %}
+    {% include 'product-block' %}
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{% if settings.home_content_type == 'home_coll_layout_active' %}
+<div class="side-gutter double-gutter">
+  {% if settings.home_coll_layout contains 'rows' %}
+  {% assign product_class = 'column ' | append: settings.home_coll_layout | remove: 'rows-' %}
+  {% endif %}
+
+  <div class="product-list {% if settings.home_coll_layout contains 'dynamic' %}jiggly-split {{ settings.home_coll_layout }}{% endif %}">
+    {% for link in linklists[settings.home_coll_select].links %}
+    {% if link.type == 'collection_link' %}
+    {% assign collection = link.object %}
+    {% include 'collection-block' %}
+    {% endif %}
+    {% endfor %}
+  </div>
+</div>
+{% endif %}

@@ -1,0 +1,41 @@
+<div class="central content chunkform {% unless settings.contact_content_bg_show %}transparent{% endunless %}">
+  <h1>{{ page.title }}</h1>
+  <div class="rte">
+    {{ page.content }}
+  </div>
+
+  <div>
+    {% form 'contact' %}
+    {% if form.posted_successfully? %}
+    <h1>{{ settings.txt_contact_succ }}</h1>
+
+    {% else %}
+
+    {% if form.errors %}
+    <ul class="errors">
+      {% for field in form.errors %}
+      <li>{{ field | replace: 'body','Message' | capitalize }} - {{ form.errors.messages[field] }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+
+    <div class="large_form">
+      <label for="contact_name">Name</label>
+      <input type="text" class="required" id="contact_name" name="contact[name]" />
+    </div>
+    <div class="large_form">
+      <label for="contact_email">Email</label>
+      <input type="email" class="required" id="contact_email" class="email" name="contact[email]" />
+    </div>
+    <div class="large_form">
+      <label for="message">Message</label>
+      <textarea id="message" class="required" name="contact[body]"></textarea>
+    </div>
+    <div class="action_bottom">
+      <input type="submit" value="Send" />
+    </div>
+
+    {% endif %}
+    {% endform %}
+  </div>
+</div>

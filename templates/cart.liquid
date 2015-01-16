@@ -1,0 +1,138 @@
+<div class="bespoke-cart">
+
+  <div class="bespoke central content">
+    <h1>Your Cart</h1>
+
+    {% if cart.item_count > 0 %}
+
+    <form action="/cart" method="post" id="cartform">
+
+      <ul class="cart-list clearfix">
+
+        {% for item in cart.items %}
+
+        {% comment %}
+        Determining the handle of the collection that was last seen for the 'continue shopping' link.
+        {% endcomment %}
+
+        {% if forloop.first %}
+        {% assign collection_url = item.product.collections.first.url %}
+        {% if collection_url == '/collections/frontpage' or collection_url == '' %}{% assign collection_url = '/collections/all' %}{% endif %}
+        {% endif %}
+
+        <li class="item clearfix">
+          <div class="bespoke-cart-product col-desc">
+            <a class="image" href="{{ item.url }}">
+              <img src="{{ item | img_url: 'small' }}" alt="{{ item.title | escape }}" />
+            </a>
+            <div class="text">
+              <div class="title">
+                <a href="{{ item.url }}">
+                  {{ item.product.title }}<br/>
+                  {% unless item.variant.title contains 'Default' %}{{ item.variant.title }}{% endunless %}
+                </a>
+              </div>
+              {% comment %}
+              Line Item Properties
+              {% endcomment %}
+              {% if item.properties.size > 0 %}
+              <div class="line-items">
+                {% for p in item.properties %}
+                {% unless p.last == blank %}
+                {{ p.first }}:
+                {% if p.last contains '/uploads/' %}
+                <a href="{{ p.last }}">{{ p.last | split: '/' | last }}</a>
+                {% else %}
+                {{ p.last }}
+                {% endif %}
+                <br />
+                {% endunless %}
+                {% endfor %}
+              </div>
+              {% endif %}
+              <div class="price">{{ item.price | money }}</div>
+            </div>
+          </div>
+          <div class="col-notdesc">
+            <span class="quantity">
+              <a class="minus" href="/cart/change?line={{ forloop.index }}&quantity={{ item.quantity | minus: 1 }}">-</a>
+              <input class="select-on-focus" type="text" size="2" id="updates_{{ item.id }}" name="updates[]" value="{{ item.quantity }}" />
+              <a class="plus" href="/cart/change?line={{ forloop.index }}&quantity={{ item.quantity | plus: 1 }}">+</a>
+            </span>
+            <a class="remove" href="/cart/change?line={{ forloop.index }}&quantity=0"><p class="remove">remove</p></a>
+          </div>
+        </li>
+        {% endfor %}
+
+      </ul>
+
+      <div class="update-continue">
+        <input class="update textbutton" type="submit" name="update" value="Update cart" />
+        <span class="bespoke-cart-span">&mdash; or &mdash;</span>
+        <a class="continue" href="{{ collection_url }}">{{ settings.txt_contshop }}</a>
+      </div>
+
+      <div class="under-cart">
+        <div class="subtotal">
+          <span class="label">Subtotal</span>
+          <span class="amount">{{ cart.total_price | money }}</span>
+        </div>
+
+        {% if settings.cart_note_show %}
+        <p class="note-area">
+          <label for="note">{{ settings.txt_cartnote }}</label>
+          <textarea id="note" name="note">{{ cart.note }}</textarea>
+        </p>
+        {% endif %}
+
+        {% if settings.cart_terms_show %}
+        <p class="terms">
+          <input type="checkbox" id="terms" /> <label for="terms">I agree to the <a href="{{ pages[settings.cart_terms_page].url }}" target="_blank">terms and refund policy</a></label>
+          <script>
+            $(document).on('click', '[name="checkout"]:submit, .additional-checkout-buttons :submit, a[href="/checkout"]', function() {
+              var $form = $('#cartform');
+              if($form.has('#terms') && $form.find('#terms:checked').length == 0) {
+                alert('You must agree to the terms and conditions before continuing.');
+                return false;
+              }
+            });
+          </script>
+        </p>
+        {% endif %}
+
+        {% if settings.show_multiple_currencies %}
+        <p class="comment rte currency-different">
+          {{ shop.name }} process all orders in <strong>{{ shop.currency }}</strong>.
+          While the content of your cart is currently displayed in
+          <strong class="selected-currency"></strong>,
+          you will checkout using <strong>{{ shop.currency }}</strong> at the most current exchange rate.
+        </p>
+        {% endif %}
+
+        <input type="submit" class="checkout-btn" name="checkout" value="{{ settings.txt_checkout | escape }}" />
+
+        {% comment %}Paypal and Google checkout buttons{% endcomment %}
+        {% if additional_checkout_buttons %}
+        <p class="additional-checkout-buttons">
+          {{ content_for_additional_checkout_buttons }}
+        </p>
+        {% endif %}
+
+        <p class="comment">{{ settings.txt_pricex }}</p>
+      </div>
+
+    </form>
+
+    {% else %}
+
+    <div>
+      <h2 class="empty-cart">It appears that your cart is empty</h2>
+      <div class="rte">
+        <p class="align-center keep-browsing">&mdash; You may continue browsing <a href="/collections/all">here</a> &mdash;</p>
+      </div>
+    </div>
+
+    {% endif %}
+  </div>
+
+</div>

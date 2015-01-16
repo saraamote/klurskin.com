@@ -1,0 +1,282 @@
+{% comment %} Google Fonts {% endcomment %}
+
+{% for i in (1..4) %}
+{% capture font_setting_index %}{% cycle 'font_group': 'font_fam_base', 'font_fam_headings', 'font_fam_nav', 'font_fam_logo' %}{% endcapture %}
+{% capture font_setting_cust_index %}{{ font_setting_index }}_cust{% endcapture %}
+{% assign font_family_split = settings[font_setting_index] | split: '|' %}
+{% assign curr_font_family = settings[font_setting_index] %}
+{% if settings[font_setting_index] == 'GWF|CUSTOM' %}
+@import url(https://fonts.googleapis.com/css?family={{ settings[font_setting_cust_index] | replace: ' ', '+' }});
+{% elsif font_family_split.first == 'GWF' %}
+@import url(https://fonts.googleapis.com/css?family={{ font_family_split.last | replace: ' ', '+' }});
+{% endif %}
+{% endfor %}
+
+{% for i in (1..4) %}
+{% capture font_setting_index %}{% cycle 'font_group': 'font_fam_base', 'font_fam_headings', 'font_fam_nav', 'font_fam_logo' %}{% endcapture %}
+{% capture font_setting_cust_index %}{{ font_setting_index }}_cust{% endcapture %}
+{% assign font_family_split = settings[font_setting_index] | split: '|' %}
+{% assign curr_font_family = settings[font_setting_index] %}
+{% if settings[font_setting_index] == 'GWF|CUSTOM' %}
+{% assign curr_font_family = settings[font_setting_cust_index] | replace: '+', ' ' | split: ':' | first %}
+{% elsif font_family_split.first == 'GWF' %}
+{% assign curr_font_family = font_family_split.last | replace: '+', ' ' | split: ':' | first %}
+{% endif %}
+{% if font_setting_index == 'font_fam_base' %}{% capture body_font %}{{ curr_font_family }}, sans-serif{% endcapture %}
+{% elsif font_setting_index == 'font_fam_headings' %}{% capture headings_font %}{{ curr_font_family }}, serif{% endcapture %}
+{% elsif font_setting_index == 'font_fam_nav' %}
+{% elsif font_setting_index == 'font_fam_logo' %}{% capture logo_font %}{{ curr_font_family }}, sans-serif{% endcapture %}
+{% endif %}
+{% endfor %}
+
+
+
+body {
+  font-family: {{ body_font }};
+  font-size: {{ settings.font_size_base }}px;
+  line-height: 1.5em;
+
+  {% if settings.bg_image_use %}
+  background: {{ settings.col_page_bg }} url({{ 'bg_custom.jpg' | asset_url }}) {{ settings.bg_image_method }};
+  {% else %}
+  background: {{ settings.col_page_bg }};
+  {% endif %}
+
+  {% if settings.bg_image_use and settings.bg_image_method != 'fill' %}
+  background: $background-col url({{ 'bg_custom.jpg' | asset_url }}) {{ settings.bg_image_method }};
+  {% elsif settings.bg_image_use %}
+  background: $background-col url({{ 'bg_custom.jpg' | asset_url }}) center top;
+  background-size: cover;
+  {% else %}
+  background: $background-col;
+  {% endif %}
+}
+
+#main,
+#footer,
+#container.slim #main,
+#container.slim #footer {
+  background: {{ settings.col_content_bg }};
+  color: {{ settings.col_text }};
+  width: auto;
+  padding: 10px 0;
+}
+
+#header #tagline {
+  width: auto;
+  padding: 10px 0;
+}
+
+#main {
+  padding: 0 10px 20px
+}
+
+#header,
+#container.slim #header {
+  padding: 0;
+  margin: 0;
+  width: auto;
+  background: none;
+  border-bottom: none;
+}
+
+#tagline .title {
+  display: block;
+  color: {{ settings.col_logo }};
+  font-family: {{ logo_font }};
+  font-size: {{ settings.logo_size }}px;
+  font-weight: normal;
+  line-height: 1.5em;
+}
+
+#tagline .subtitle {
+  color: {{ settings.col_logo }};
+}
+
+#footer {
+  padding: 0;
+  margin: 0;
+  width: auto;
+  border-top: 1px solid {{ settings.col_text }};
+}
+
+h1,h2,h3,h4,h5,h6,
+.group h3, .pgroup h3,
+#cost, #order-num, #overview h2,
+h4.active-customer,
+#header #tagline,
+#email label {
+  font-family: {{ headings_font }};
+  font-size: {{ settings.font_scale_headings }}em;
+  font-weight: normal;
+  line-height: 1.2em;
+  color: {{ settings.col_headings }};
+  text-shadow: none;
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+  border: none;
+}
+
+#header #tagline {
+  margin: 0;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+a,
+a:hover,
+#overview a,
+#thumbs h3 span {
+  color: {{ settings.col_links }};
+}
+
+#container {
+  font-size: 1em;
+}
+
+label {
+  font-weight: normal;
+}
+
+#products {
+  border: none;
+}
+
+#thumbs {
+  width: 96%;
+}
+
+#thumbs span,
+#overview .hint,
+h1 span.subtitle {
+  color: inherit;
+  line-height: 1.1em;
+}
+
+#thumbs td {
+  font-size: 1em;
+}
+
+#thumbs h3 {
+  font-size: 1em;
+}
+
+#thumbs div,
+#wallet,
+#overview,
+#email,
+#addresses,
+#buttons,
+.group {
+  border: none;
+  background: transparent;
+  padding: 0;
+}
+
+#wallet {
+  border-left: 1px solid {{ settings.col_text }};
+  padding-bottom: 20px;
+}
+
+#wallet-highlight { background: #ddd; }
+
+#cost {
+  margin-bottom: 0;
+  font-size: 3em;
+}
+
+#email { padding: 0; }
+#email label { margin-bottom: 5px; }
+#email input { font-size: 1em; }
+
+h4.active-customer {
+  font-size: 130%;
+}
+
+#overview {
+  padding: 10px;
+}
+
+{% if settings.logo_type == "image" and settings.show_checkout_logo %}
+#container.slim {
+  min-width: {{ settings.logo_width }}px;
+}
+
+#tagline .title {
+  display: none;
+}
+
+#header #tagline {
+  background: transparent;
+}
+
+#logo {
+  margin: 0 auto 20px;
+  width: {{ settings.logo_width }}px;
+  height: {{ settings.logo_height }}px;
+  background: url({{ 'logo.png' | asset_url }}) no-repeat center top;
+  background-size: 100%;
+  filter: progid:DXImageTransform.Microsoft.AlphaImageLoader
+            (src='{{ 'logo.png' | asset_url }}',sizingMethod='scale');
+}
+{% endif %}
+
+input,
+input[type=text],
+input[type=password],
+textarea,
+.form td input {
+  color: {{ settings.col_text }};
+  border: 1px solid {{ settings.col_text }};
+  background: transparent;
+  padding: 0.5em 0.6em;
+  max-width: 100%;
+  font-size: {{ settings.font_size_base }}px;
+  border-radius: 2px;
+}
+
+input[type=checkbox],
+.form td input[type=checkbox] {
+  width: auto;
+}
+
+
+button,
+input[type=submit],
+.btn, a.btn, .btn:hover, a.btn:hover,
+#buttons input {
+  -webkit-appearance: none;
+  display: inline-block;
+  background: {{ settings.col_btn_bg }};
+  color: {{ settings.col_btn }};
+  border: none;
+  height: auto;
+  width: auto;
+  padding: 15px 1.7em 13px;
+  font-size: 1.05em;
+  font-weight: normal;
+  vertical-align: top;
+  line-height: 1.2em;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  vertical-align: middle;
+
+  border-radius: 3px;
+  transition: opacity 200ms, background-color 150ms, border-color 150ms;
+
+  &:hover {
+      background: {{ settings.col_btn_bg_hov }};
+      border-color: {{ settings.col_btn_bg_hov }};
+    }
+}
+
+#discounts input[type=submit] {
+  padding: 9px 1.7em 8px;
+  vertical-align: top;
+}
+
+.footer p {
+  margin: 0;
+  padding: 5px 0;
+}

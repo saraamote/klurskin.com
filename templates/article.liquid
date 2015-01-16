@@ -1,0 +1,174 @@
+<div class="central content">
+  {% paginate article.comments by 50 %}
+
+  {% comment %}
+  When a comment has just been submitted, it's not shown right away.
+  Shopify needs to wait until it knows for sure that it is not spam to publish it.
+  We can still show right away *to its author* the comment he just submitted
+  — although that comment may not have been published yet.
+  When a comment is submitted, the browser is redirected to a page that
+  includes the new comment id in its URL. Example:
+  http://shopname.myshopify.com/blogs/news/2022072-my-post?comment=3721372
+  When a comment ID is specified in an article URL, that comment is accessible in the
+  template through a Liquid object called comment.
+  That comment is a full-fledged comment variable that has all the regular comment properties:
+  http://docs.shopify.com/themes/liquid-variables/comment.
+  Note that comment.created_at will only be defined if the comment did not have any blank field
+  — was posted without error.
+  {% endcomment %}
+
+  {% assign number_of_comments = article.comments_count %}
+
+  {% comment %}If a comment was just submitted, and it has no blank fields.{% endcomment %}
+  {% if comment and comment.created_at %}
+  {% assign number_of_comments = article.comments_count | plus: 1 %}
+  {% endif %}
+
+  <h3 class="page-title"><a href="{{ blog.url }}">{{ blog.title }}</a></h3>
+
+  <div class="article">
+    <h1 class="page-title">
+      {{ article.title }}
+    </h1>
+
+    <p class="meta">
+      <time pubdate datetime="{{ article.published_at | date: '%Y-%m-%d' }}">{{ article.published_at | date: '%b %d, %Y' }}</time>
+
+      <a class="share-link" href="#" data-modal-target="#mega-sharing">{{ settings.txt_share_l }}</a>
+    </p>
+
+    <div id="mega-sharing" class="hidden">
+      <div class="mega-sharing">
+        {% include 'social-sharing' with article %}
+      </div>
+    </div>
+
+    <div class="rte">
+      {% if settings.blog_imgs_fw %}
+      {% assign split_excerpt = article.content | split: '<img' %}
+      {{ split_excerpt.first }}
+      {% for chunk in split_excerpt %}
+      {% unless forloop.first %}
+      <div class="no-side-pad"><img{{ chunk | replace_first: '>', '></div>' }}
+      {% endunless %}
+      {% endfor %}
+      {% else %}
+      {{ article.content }}
+      {% endif %}
+    </div>
+  </div>
+
+  {% if blog.comments_enabled? %}
+  <div id="comments" class="content-row">
+
+    {% comment %}If a comment was just submitted with no blank field.{% endcomment %}
+    {% if comment and comment.created_at %}
+    <p class="success feedback">
+      {% if blog.moderated? %}
+      Your comment was posted successfully. We will publish it in a little while, as our blog is moderated.
+      {% else %}
+      Your comment was posted successfully! Thank you!
+      {% endif %}
+    </p>
+    {% endif %}
+
+    {% if number_of_comments > 0 %}
+    <ul>
+      {% comment %}If a comment was just submitted with no blank field, let's show it.{% endcomment %}
+      {% if comment and comment.created_at %}
+      <li id="{{ comment.id }}" class="comment first{% if article.comments_count == 0 %} last{% endif %}">
+        <h4 class="comment-author">{{ comment.author }} says...</h4>
+        <div class="comment-content">
+          {{ comment.content }}
+        </div>
+        <p class="comment-date">
+          On {{ comment.created_at | date: "%B %d, %Y" }}
+        </p>
+      </li>
+      {% endif %}
+      {% comment %}Showing the rest of the comments.{% endcomment %}
+      {% for comment in article.comments %}
+      <li id="{{ comment.id }}" class="comment{% unless number_of_comments > article.comments_count %}{% if forloop.first %} first{% endif %}{% endunless %}{% if forloop.last %} last {% endif %}">
+        <h4 class="comment-author">{{ comment.author }} says...</h4>
+        <div class="comment-content">
+          {{ comment.content }}
+        </div>
+        <p class="comment-date">
+          On {{ comment.created_at | date: "%B %d, %Y" }}
+        </p>
+      </li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+
+    {% comment %}Comments are paginated.{% endcomment %}
+    {% if paginate.pages > 1 %}
+    <div id="pagination">
+      {{ paginate | default_pagination }}
+    </div>
+    {% endif %}
+
+    {% comment %}Comment submission form.{% endcomment %}
+    <div id="template">
+      {% form article %}
+
+      <h3 id="add-comment-title">Leave a comment</h3>
+
+      {% if form.errors %}
+      <div class="feedback error">
+        {{ form.errors | default_errors }}
+      </div>
+      {% endif %}
+
+      <div class="large_form">
+        <label for="comment-author">Name</label>
+        <input required{% if form.errors contains "author" %} class="error"{% endif %} type="text" name="comment[author]" placeholder="Your name" id="comment-author" value="{{ form.author }}" />
+      </div>
+
+      <div class="large_form">
+        <label for="comment-email">Email</label>
+        <input required{% if form.errors contains "email" %} class="error"{% endif %} type="email" name="comment[email]" placeholder="your@email.com" id="comment-email" value="{{ form.email }}" />
+      </div>
+
+      <div class="large_form">
+        <label for="comment-body">Message</label>
+        <textarea required{% if form.errors contains "body" %} class="error"{% endif %} name="comment[body]" id="comment-body">{{ form.body }}</textarea>
+      </div>
+
+      <div class="action_bottom">
+        <input type="submit" value="Post Comment" />
+      </div>
+
+      {% if form.errors %}
+      <script>
+        window.location.hash = '#add-comment-title';
+      </script>
+      {% endif %}
+
+      {% if form.posted_successfully? %}
+      <script>
+        window.location.hash = '#comments';
+      </script>
+      {% endif %}
+
+      {% endform %}
+    </div>
+
+  </div>
+  {% endif %}
+
+  {% if blog.next_article or blog.previous_article %}
+  <p class="left-right-links">
+    {% if blog.previous_article %}
+    {{ '&larr; Older Post' | link_to: blog.previous_article }}
+    {% endif %}
+
+    {% if blog.next_article %}
+    {{ 'Newer Post &rarr;' | link_to: blog.next_article }}
+    {% endif %}
+  </p>
+  {% endif %}
+
+
+  {% endpaginate %}
+</div>

@@ -1,0 +1,51 @@
+{% assign bg_image = false %}
+
+{% if settings.bg_image_use and settings.bg_image_method == 'fill' %}
+{% assign bg_image = 'bg_custom.jpg' | asset_url %}
+{% endif %}
+
+{% if template contains 'product' %}
+
+{% include 'get-product-bg-image' %}
+{% if prod_bg_image %}{% assign bg_image = prod_bg_image.src | product_img_url: 'master' %}{% endif %}
+
+{% elsif template contains 'index' %}
+{% if settings.head_img_home_show %}{% assign bg_image = 'head_img_home.jpg' | asset_url %}{% endif %}
+
+{% elsif template contains 'collection' %}
+{% if settings.head_img_coll_show %}
+{% if settings.head_img_coll_handled and collection.handle %}
+  {% assign bg_image = 'collection-header-' | append: collection.handle | append: '.jpg' | file_url %}
+{% else %}
+  {% assign bg_image = 'head_img_coll.jpg' | asset_url %}
+{% endif %}
+{% endif %}
+
+{% elsif template contains 'search' %}
+{% if settings.head_img_coll_show %}{% assign bg_image = 'head_img_coll.jpg' | asset_url %}{% endif %}
+
+{% elsif template contains 'blog' %}
+{% if settings.head_img_blog_show %}{% assign bg_image = 'head_img_blog.jpg' | asset_url %}{% endif %}
+
+{% elsif template contains 'article' %}
+{% if settings.head_img_blog_show %}{% assign bg_image = 'head_img_blog.jpg' | asset_url %}{% endif %}
+
+{% elsif template contains 'cart' %}
+{% if settings.head_img_cart_show %}{% assign bg_image = 'head_img_cart.jpg' | asset_url %}{% endif %}
+
+{% elsif template contains 'customers' or template contains 'ugly' or template contains 'acct' %}
+{% if settings.head_img_cust_show %}{% assign bg_image = 'head_img_cust.jpg' | asset_url %}{% endif %}
+
+{% elsif template contains 'page.bespoke' %}
+{% assign bg_image = 'head_img_page.jpg' | asset_url %}
+
+{% endif %}
+
+
+{% unless bg_image == false %}
+<div id="page-bg">
+  {% if template contains 'index' and settings.home_content_type == 'home_inactive' and settings.head_img_home_use_url %}<a href="{{ settings.head_img_home_url }}" {% if settings.head_img_home_url.first == '#' %}data-modal-toggle="{{ settings.head_img_home_url }}"{% endif %}>{% endif %}
+  {{ bg_image | img_tag }}
+  {% if template contains 'index' and settings.home_content_type == 'home_inactive' and settings.head_img_home_use_url %}</a>{% endif %}
+</div>
+{% endunless %}

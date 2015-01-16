@@ -1,0 +1,14 @@
+<div class="central">
+  <div class="content {% unless settings.coll_content_bg_show %}transparent{% endunless %}">
+    {% if collection.description.size > 0 %}
+    <h1>{{ collection.title }}</h1>
+    <div class="rte">
+      {{ collection.description }}
+    </div>
+    {% else %}
+    <h1 class="no-margin">{{ collection.title }}</h1>
+    {% endif %}
+  </div>
+</div>
+
+{% include 'collection-listing' with collection.handle %}

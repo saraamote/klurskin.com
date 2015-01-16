@@ -1,0 +1,84 @@
+<div class="central content">
+  {% paginate blog.articles by 6 %}
+
+  {% if current_tags %}
+  <h1><a href="{{ blog.url }}">{{ blog.title | link_to: blog.url }}</a> / {{ current_tags.first }}</h1>
+  {% else %}
+  <h1>{{ blog.title }} <a class="rsslink" href="{{ blog.url }}.atom" title="{{ blog.title | escape }} RSS"><i class="icon-rss"></i></a></h1>
+  {% endif %}
+
+
+  {% if blog.all_tags.size > 0 %}
+  <div class="option align-center">
+    <label for="filter-by">Filter by</label>
+    <select id="filter-by" class="redirecter">
+      <option value="{{ blog.url }}">{{ 'All' }}</option>
+      {% for tag in blog.all_tags %}
+      <option value="{{ blog.url }}/tagged/{{ tag | handle }}" {% if current_tags contains tag %}selected{% endif %}>{{ tag | capitalize }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  {% endif %}
+
+
+  <div class="articles">
+
+    {% for article in blog.articles %}
+    <article class="article content-row">
+      <h2 class="title">
+        <a href="{{ article.url }}">{{ article.title }}</a>
+      </h2>
+
+      <p class="meta">
+        <time pubdate datetime="{{ article.published_at | date: '%Y-%m-%d' }}">{{ article.published_at | date: '%b %d, %Y' }}</time>
+        {% if blog.comments_enabled? and article.comments_count > 0 %}
+        | <span class="comment-count">
+        <a href="{{ article.url }}#comments">{{ article.comments_count }} {{ article.comments_count | pluralize: 'comment','comments' }}</a>
+        </span>
+        {% endif %}
+
+        <a class="share-link" href="#" data-modal-target="#mega-sharing-{{ article.title | handle }}">{{ settings.txt_share_l }}</a>
+      </p>
+
+      <div id="mega-sharing-{{ article.title | handle }}" class="hidden">
+        <div class="mega-sharing">
+          {% include 'social-sharing' with article %}
+        </div>
+      </div>
+
+      <div class="rte">
+        {% if article.excerpt.size > 0 %}
+          {% if settings.blog_imgs_fw %}
+            {% assign split_excerpt = article.excerpt | split: '<img' %}
+            {{ split_excerpt.first }}
+            {% for chunk in split_excerpt %}
+            {% unless forloop.first %}
+			<div class="no-side-pad"><img{{ chunk | replace_first: '>', '></div>' }}
+            {% endunless %}
+            {% endfor %}
+          {% else %}
+            {{ article.excerpt }}
+          {% endif %}
+        {% else %}
+          <p>{{ article.content | strip_html | truncatewords: 100 }}</p>
+        {% endif %}
+      </div>
+      <a class="blog-read-more" href="{{ article.url }}">Read more →</a>
+    </article>
+    {% endfor %}
+
+  </div>
+
+  {% if paginate.pages > 1 %}
+  <div class="pagination">
+    {% comment %}
+    When paginating blog articles, a previous article is actually a newer article, not an older one,
+    because blog articles are shown and paginated in a reversed chronological order.
+    The word 'previous' can be confusing, hence we'll change it.
+    {% endcomment %}
+    {{ paginate | default_pagination | replace: 'Previous', 'Newer articles' | replace: 'Next', 'Older articles' }}
+  </div>
+  {% endif %}
+
+  {% endpaginate %}
+</div>

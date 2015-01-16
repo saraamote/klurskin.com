@@ -1,0 +1,21 @@
+<div class="social-sharing social-icons">
+
+  <span class="share-label">{{ settings.txt_share }}</span>
+
+  {% assign title_to_share = social-sharing.title %}
+  {% assign url_to_share = shop.url | append: social-sharing.url %}
+
+  <a class="facebook" title="Share on Facebook" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u={{ url_to_share | url_param_escape }}"><i class="icon-facebook"></i><span>Share on Facebook</span></a>
+
+  <a class="twitter" title="Share on Twitter" target="_blank" href="https://twitter.com/intent/tweet?text=Check out {{ title_to_share | url_param_escape }}: {{ url_to_share | url_param_escape }}"><i class="icon-twitter"></i><span>Share on Twitter</span></a>
+
+  {% if template == 'product' %}
+  {% capture img_to_share %}http:{{ product.featured_image | product_img_url: 'master' }}{% endcapture %}
+  <a class="pinterest" title="Pin the main product image" target="_blank" href="//pinterest.com/pin/create/button/?url={{ url_to_share | url_param_escape }}&amp;media={{ img_to_share | url_param_escape }}&amp;description={{ product.title | url_param_escape }}"><i class="icon-pinterest"></i><span>Pin this</span></a>
+  {% endif %}
+
+  <a class="google" title="Share on Google+" target="_blank" href="https://plus.google.com/share?url={{ url_to_share | url_param_escape }}"><i class="icon-googleplus"></i><span>Share on Google+</span></a>
+
+  <a class="email" title="Email this product" href="mailto:?subject=Check out {{ title_to_share | url_param_escape }}&amp;body=Check out {{ title_to_share | url_param_escape }} on {{ shop.name | url_param_escape }}:%0D%0A%0D%0A{{ url_to_share | url_param_escape }}"><i class="icon-mail"></i><span>Email this</span></a>
+
+</div>

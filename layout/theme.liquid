@@ -1,0 +1,225 @@
+<!doctype html>
+<!--[if IE 8]><html class="no-js ie8" lang="en"> <![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!--> <html class="no-js"> <!--<![endif]-->
+<head>
+  <!-- Showcase 1.0.8 -->
+  <meta charset="utf-8" />
+  <!--[if IE]><meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1' /><![endif]-->
+
+  <title>
+  {{ page_title }}{% if current_tags %} &ndash; tagged "{{ current_tags | join: ', ' }}"{% endif %}{% if current_page != 1 %} &ndash; Page {{ current_page }}{% endif %}{% unless page_title contains shop.name %} &ndash; {{ shop.name }}{% endunless %}
+  </title>
+
+  {% if page_description %}
+  <meta name="description" content="{{ page_description | escape }}" />
+  {% endif %}
+
+  <link rel="canonical" href="{{ canonical_url }}" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  {% comment %} Google Fonts {% endcomment %}
+  {% for i in (1..4) %}
+  {% capture font_setting_index %}{% cycle 'font_group': 'font_fam_base', 'font_fam_headings', 'font_fam_nav', 'font_fam_logo' %}{% endcapture %}
+  {% capture font_setting_cust_index %}{{ font_setting_index }}_cust{% endcapture %}
+  {% assign font_family_split = settings[font_setting_index] | split: '|' %}
+  {% assign curr_font_family = settings[font_setting_index] %}
+  {% if settings[font_setting_index] == 'GWF|CUSTOM' %}
+  <link href="//fonts.googleapis.com/css?family={{ settings[font_setting_cust_index] | replace: ' ', '+' | remove: "'" | remove: '"' }}" rel="stylesheet" type="text/css">
+  {% elsif font_family_split.first == 'GWF' %}
+  <link href="//fonts.googleapis.com/css?family={{ font_family_split.last | replace: ' ', '+' }}" rel="stylesheet" type="text/css">
+  {% endif %}
+  {% endfor %}
+
+  <!--bespoke fonts-->
+
+  <script src="//use.typekit.net/ocw0jdd.js"></script>
+  <script>try{Typekit.load();}catch(e){}</script>
+
+  {% include 'open-graph-tags' %}
+
+  {{ content_for_header }}
+
+  {{ 'pw-font.css' | asset_url | stylesheet_tag }}
+  {{ 'style.scss.css' | asset_url | stylesheet_tag }}
+
+  <!--[if (gte IE 6)&(lte IE 8)]>
+  {{ 'selectivizr-min.js'  | asset_url | script_tag }}
+  {{ '//html5shiv.googlecode.com/svn/trunk/html5.js' | script_tag }}
+  <![endif]-->
+
+  {% if template contains 'customers' %}
+  {{ 'shopify_common.js' | shopify_asset_url | script_tag }}
+  {{ 'customer_area.js'  | shopify_asset_url | script_tag }}
+  {% endif %}
+
+  {% comment %}
+  Needed when shopify_common.js is used.
+  {% endcomment %}
+  <!--[if lt IE 8]>
+  {{ 'json2.js' | shopify_asset_url | script_tag }}
+  <![endif]-->
+
+  {{ 'option_selection.js' | shopify_asset_url | script_tag }}
+
+  {{ '//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js' | script_tag }}
+  {{ 'api.jquery.js' | shopify_asset_url | script_tag }}
+
+  <!--bespoke-->
+  {{ 'bespoke.css' | asset_url | stylesheet_tag }}
+</head>
+
+{% capture logo_html %}
+{% unless template contains 'index' and settings.logo_display == 'not-home' %}
+<a id="logo" href="/">
+  {% if settings.logo_type == "image" %}
+  <img src="{{ 'logo.png' | asset_url }}" alt="{{ shop.name | escape }}" />
+  {% else %}
+  {{ shop.name | escape }}
+  {% endif %}
+</a>
+{% endunless %}
+{% endcapture %}
+
+<body id="page-{{ page_title | handle }}" class="{% if customer %}customer-logged-in {% endif %}template-{{ template | replace: '.', ' ' | truncatewords: 1, '' | handle }}{% if template contains 'customers' %} template-customer-area{% endif %}{% if logo_html contains 'img' %} has-logo{% endif %}" >
+
+
+  {% if template != "index" %}
+  <div id="site-control" class="{{ settings.head_layout }}">
+
+    <div class="logo-upper">{{ logo_html }}</div>
+
+    <span class="links">
+      <a class="home" title="Home" href="/"><i class="icon-house"></i><span>Home</span></a>
+      <a class="menu" href="#page-menu" data-modal-toggle="#page-menu"><i class="icon-nav"></i><span>Menu</span></a>
+
+      {{ logo_html }}
+
+      <a class="cart" href="/cart">
+        <i class="icon-bag2">{% if cart.item_count > 0 %}<div>{{ cart.item_count }}</div>{% endif %}</i>
+        <span>{{ settings.txt_cart }} {% if cart.item_count > 0 %}({{ cart.item_count }}){% endif %}</span>
+      </a>
+      <a class="search" title="Search" href="/search" data-modal-toggle="#search-modal"><i class="icon-mag"></i><span>Search</span></a>
+    </span>
+
+  </div>
+
+  {% endif %}
+
+  {% include 'page-background' %}
+
+  {% if template != "index" %}
+
+  <div id="page-content">
+
+    {{ content_for_layout }}
+
+  </div>
+
+  {% endif %}
+
+    {% if template == "index" %}
+
+  <div id="bespoke-logo">
+
+    <img src="{{ 'klurskin-stamp.png' | asset_url }}" alt="{{ shop.name | escape }}" />
+
+  </div>
+
+  <div id="bespoke-page-content">
+
+    {{ content_for_layout }}
+
+  </div>
+
+  {% endif %}
+
+  <nav id="page-menu" class="theme-modal {{ settings.nav_sub_mode }}">
+    <div class="inner">
+      <div class="container">
+        {% comment %} Button must be inside container, as container is hidden during drilldown {% endcomment %}
+        <div class="modal-actions">
+          <a class="close-modal" href="#" data-modal-close><i class="icon-cross"></i></a>
+        </div>
+
+        {% if shop.customer_accounts_enabled %}
+        <div class="customer-links">
+          {% if customer %}
+          <a href="/account">{{ settings.txt_youracc }}</a> | {{ settings.txt_logout | customer_logout_link }}
+          {% else %}
+          {{ settings.txt_login | customer_login_link }}
+          {% if shop.customer_accounts_optional %}
+          | {{ settings.txt_register | customer_register_link }}
+          {% endif %}
+          {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="nav main-nav">
+          {% include 'recursive-navigation-helper' with 'main-menu' %}
+        </div>
+
+        {% include 'currencies-switcher' %}
+
+        {% include 'social-links' %}
+
+        <div class="nav footer-nav">
+          {% include 'recursive-navigation-helper' with 'footer' %}
+        </div>
+
+        <div class="posh-divider"><img src="{{ 'klurskin-stamp.png' | asset_url }}" alt="{{ shop.name | escape }}" /><div class="posh1"></div><div class="posh2"></div></div>
+
+        <p class="copyright" role="contentinfo">
+          <span class="shop">&copy; {{ "now" | date: "%Y" }} {{ shop.name }}</span>
+
+          {% unless settings.theme_by_hide %}<span class="theme">Theme by <a href="http://www.cleanthemes.co.uk" target="_blank">Clean Themes</a></span>{% endunless %}
+          <a class="builtwithlove" href="http://www.saramote.com" target="_blank">Built on Shopify by Sara Mote &amp; Co.</a>
+        </p>
+
+        {% if settings.pay_dankort or settings.pay_google_wallet or settings.pay_discover or settings.pay_paypal or settings.pay_amex or settings.pay_maestro or settings.pay_cirrus or settings.pay_mastercard or settings.pay_visa %}
+        <ul class="payment-methods">
+          {% if settings.pay_paypal %}<li class="pw pw-paypal-new"><span>PayPal</span></li>{% endif %}
+          {% if settings.pay_visa %}<li class="pw pw-visa"><span>Visa</span></li>{% endif %}
+          {% if settings.pay_mastercard %}<li class="pw pw-mastercard"><span>Mastercard</span></li>{% endif %}
+          {% if settings.pay_amex %}<li class="pw pw-american-express"><span>Amex</span></li>{% endif %}
+          {% if settings.pay_discover %}<li class="pw pw-discover"><span>Discover</span></li>{% endif %}
+          {% if settings.pay_maestro %}<li class="pw pw-maestro"><span>Maestro</span></li>{% endif %}
+          {% if settings.pay_google_wallet %}<li class="pw pw-google-wallet"><span>Google Wallet</span></li>{% endif %}
+          {% if settings.pay_jcb %}<li class="pw pw-jcb"><span>JCB</span></li>{% endif %}
+          {% if settings.pay_diners %}<li class="pw pw-diners"><span>Diners Club</span></li>{% endif %}
+          {% if settings.pay_bitcoin %}<li class="pw pw-bitcoin"><span>Bitcoin</span></li>{% endif %}
+        </ul>
+        {% endif %}
+      </div>
+    </div>
+  </nav>
+
+  <!-- Search form -->
+  <div id="search-modal" class="theme-modal">
+    <div class="inner">
+      <div class="modal-actions">
+        <a class="close-modal" href="#" data-modal-close><i class="icon-cross"></i></a>
+      </div>
+      <div class="container">
+        <h1>Search</h1>
+        <div class="chunkform">
+          <form action="/search" method="get" class="search-form" role="search">
+            {% if settings.search_prods_only %}<input type="hidden" name="type" value="product">{% endif %}
+
+            <div class="large_form inline-input-button align-center">
+              <input class="permanent-border" type="text" name="q" value="{{ search.terms | escape }}" autocomplete="off" required />
+              <input type="submit" value="{{ settings.txt_search }}" />
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {{ 'libs.js'  | asset_url | script_tag }}
+  {{ 'main.js'  | asset_url | script_tag }}
+
+  {% include 'currencies' %}
+
+</body>
+</html>

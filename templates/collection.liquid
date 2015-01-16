@@ -1,0 +1,23 @@
+{% paginate collection.products by settings.coll_num_prods %}
+
+{% unless collection.products.size > 0 %}<p class="align-centre"><em>{{ settings.txt_noprods }}</em></p>{% endunless %}
+
+<div class="side-gutter double-gutter">
+  <div class="product-list {% if settings.coll_layout contains 'dynamic' %}jiggly-split {{ settings.coll_layout }}{% endif %}">
+    {% if settings.coll_layout contains 'rows' %}
+    {% assign product_class = 'column ' | append: settings.coll_layout | remove: 'rows-' %}
+    {% endif %}
+
+    {% for product in collection.products %}
+    {% include 'product-block' %}
+    {% endfor %}
+  </div>
+</div>
+
+{% if paginate.pages > 1 %}
+<div class="pagination central content {{ settings.coll_infiniscroll }}">
+  {{ paginate | default_pagination }}
+</div>
+{% endif %}
+
+{% endpaginate %}

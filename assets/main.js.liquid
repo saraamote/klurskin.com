@@ -1,0 +1,593 @@
+/// Shop-specific scripts
+var themeLoadingIcon = '<i class="icon-loading icon-spin"></i>';
+var modalCloseButton = '<a class="close-modal" href="#" data-modal-close><i class="icon-cross"></i></a>';
+
+$('html').removeClass('no-js');
+
+if(browserHas3DTransforms()) $('html').addClass('supports-transforms');
+
+var spinnerOpts = {
+  lines: 15, length: 0, width: 4, radius: 15, corners: 1, rotate: 0,
+  direction: 1, speed: 1, trail: 60, shadow: false, hwaccel: false, className: 'spinner',
+  zIndex: 2e9, top: '50%', left: '50%'
+};
+var smallSpinnerOpts = $.extend({}, spinnerOpts, { lines: 11, length: 0, width: 3, radius: 7 });
+
+jQuery(function($){
+  /// Galleries (only on large screens)
+  if($(window).width() >= 768) {
+    $('a[rel="gallery"]').colorbox({rel:'gallery'});
+  }
+
+  /// Useful class to detect if scrolled
+  $(window).on('scroll load', function(){
+    $('body').toggleClass('scrolled-down', $(window).scrollTop() > 0);
+  });
+
+  /// Nav
+  $('#page-menu .main-nav li:has(ul)').addClass('has-children');
+  $('#page-menu.use-modal .main-nav li.has-children > a').append('<i class="icon-arrow-right"></i>');
+
+  //Drill down
+  var drilldownTransSpeed = 250;
+  $('#page-menu.use-modal').on('click', '.main-nav li.has-children > a', function(){
+    //Create new content
+    var trimmedTitle = $(this).text().replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+    //- Links
+    var $content = $('<div class="container"/>').append( $(this).siblings('ul').clone().wrap('<div class="main-nav"/>').parent() );
+    //- Title, in its own menu row, using subnav style for the other links
+    $content.find('.main-nav > ul').wrap('<li/>').parent().wrap('<ul/>').parent().prepend('<li class="title">'+trimmedTitle+'</li>');
+    //- Breadcrumbs
+    //Current crumbs...
+    var $crumbs = $(this).closest('.container').find('.crumbs').clone();
+    //New crumbs
+    if($crumbs.length == 0) {
+      $crumbs = $('<ul class="crumbs"><li><a href="#">Home</a></li></ul>');
+    }
+    $crumbs.append('<li><a href="#">'+trimmedTitle+'</a></li>');
+    $content.prepend($crumbs);
+    //- Navigation buttons
+    $content.prepend('<div class="modal-actions"><a href="#" data-revert-back><i class="icon-arrow-left"></i></a> <a href="#" data-reset-and-close><i class="icon-cross"></i></a></div>');
+
+    //Hide current & show new
+    var $containers = $('#page-menu > .inner > .container:not(.inactive)');
+    $containers.addClass('inactive').fadeOut(drilldownTransSpeed, function(){
+      $content.hide().appendTo('#page-menu > .inner').fadeIn(drilldownTransSpeed);
+    });
+    return false;
+  });
+  //Drill back up
+  $('#page-menu.use-modal').on('click', 'a[data-revert-back]', function(){
+    $('#page-menu.use-modal > .inner > .container:not(.inactive)').fadeOutAndRemove(drilldownTransSpeed, function(){
+      $('#page-menu.use-modal > .inner > .container.inactive:last').removeClass('inactive').fadeIn(drilldownTransSpeed);
+    });
+    return false;
+  });
+  //Oh crumbs
+  $('#page-menu.use-modal').on('click', '.crumbs a', function(){
+    var desiredNumContainers = $(this).parent().index() + 1;
+    var $containers = $('#page-menu.use-modal > .inner > .container');
+    if(desiredNumContainers < $containers.length) {
+      $containers.slice(desiredNumContainers).fadeOutAndRemove(drilldownTransSpeed, function(){
+        $('#page-menu.use-modal > .inner > .container.inactive:last').removeClass('inactive').fadeIn(drilldownTransSpeed);
+      });
+    }
+    return false;
+  });
+  //Close and reset nav
+  $('#page-menu.use-modal').on('reset-modal', function(){
+    closeThemeModal();
+    setTimeout(function(){
+      $('#page-menu.use-modal > .inner > .container').removeClass('inactive').show().slice(1).remove();
+    }, 300); // Delay to match transition on .theme-modal.reveal
+    return false;
+  }).on('click', 'a[data-reset-and-close]', function(){
+    $('#page-menu.use-modal').trigger('reset-modal');
+    return false;
+  });
+
+  /// Page-filling background
+  $('#page-bg img').willFillParent({ closest: '#page-bg', windowEvent: 'resize' });
+
+  /* If one ever needs to programmatically change the background image, this is how it is done:
+  $(document).on('click', '.thumbnails .thumb a', function(){
+    $('#page-bg > img').willFillParent({
+      changeURL: $(this).attr('href'),
+      loadingHTML: themeLoadingIcon
+    });
+    return false;
+  });*/
+
+  function isPageScrollin() {
+    return $('#page-content').outerHeight() > $(window).height();
+  }
+
+  /// Modal windows
+  var removeModalTimeoutID = -1;
+  window.closeThemeModal = function(immediate){
+    $('a[data-modal-toggle].active').removeClass('active');
+    $('.theme-modal.reveal').removeClass('reveal').addClass('unreveal');
+    if($('html.supports-transforms').length && (typeof immediate == 'undefined' || !immediate)) {
+      removeModalTimeoutID = setTimeout(function(){
+        $('body').removeClass('modal-active');
+        $('body, #page-content, #site-control').css('padding-right', '');
+      }, 300); // Delay to match transition on .theme-modal.reveal
+    } else {
+      $('body').removeClass('modal-active');
+      $('body, #site-control').css('padding-right', '');
+    }
+  };
+
+  //Show arbitrary content in modal window
+  window.showThemeModal = function(el){
+    //Close current
+    closeThemeModal(true);
+    //Remove any existing temporary modals
+    $('.theme-modal.temp').remove();
+    //Actually add to the page
+    var $el = $(el);
+    $el.appendTo('body').addClass('reveal').find('.modal-actions').remove();
+    $el.prepend('<div class="modal-actions">'+modalCloseButton+'</div>');
+    //When body is under a modal & has scrollbar, it is not allowed to scroll,
+    //so we overflow:hidden it and add a padding the same size as the scrollbar
+    if(isPageScrollin()) {
+      $('#page-content, #site-control').css('padding-right', $.scrollBarWidth());
+    }
+    //Set page state
+    $('body').addClass('modal-active');
+  };
+
+  //Show existing modal container hidden on page
+  $(document).on('click', 'body:not(.modal-active) a[data-modal-toggle]', function(e){
+    e.preventDefault();
+    var $target = $($(this).data('modal-toggle')).removeClass('unreveal').addClass('reveal');
+    $target.find(':input[type=text]:visible:first').focus(); //Any inputs to highlight?
+    $(this).addClass('active');
+    //When body is under a modal, it is not allowed to scroll, so we need this to keep it the same width
+    if(isPageScrollin()) {
+      $('body, #site-control').css('padding-right', $.scrollBarWidth());
+    }
+    $('body').addClass('modal-active');
+  }).on('keyup', function(e){
+    //On pressing escape
+    if(e.which == 27) {
+      closeThemeModal();
+    }
+  });
+  //Close modal button
+  $(document).on('click', 'body.modal-active a[data-modal-close]', function(e){
+    e.preventDefault();
+    closeThemeModal();
+  });
+  //Click outside container to close modal
+  $(document).on('click', '.theme-modal', function(e){
+    if(e.target == this) {
+      e.preventDefault();
+      closeThemeModal();
+
+      //Trigger any reset events (e.g. in drilldown nav)
+      $(this).trigger('reset-modal');
+    }
+  });
+  //Switch to a different modal
+  $(document).on('click', 'body.modal-active a[data-modal-toggle]', function(e){
+    e.preventDefault();
+    closeThemeModal();
+    $(this).click();
+  });
+
+  //Open arbitrary page in a modal
+  $(document).on('click', 'a[data-modal-target]', function(e){
+    e.preventDefault();
+    showThemeModal($('<div class="theme-modal temp"/>').append($('<div class="inner"/>').html($($(this).data('modal-target')).wrapInner('<div class="container"/>').html())));
+  });
+
+
+  /// Product page gallery
+  $.fn.themeLazyLoad = function(){
+    return $(this).each(function(){
+      //Used in a few places to avoid blank.gif breaking imagesLoaded
+      var newTag = $(this).clone().wrap('<div />').parent().html();
+      newTag = newTag.replace(/(src=")([^"]*)/gi, "$1" + $(this).data('src'));
+      var $newTag = $(newTag);
+      var $oldTag = $(this);
+      $newTag.imagesLoaded(function(){
+        $oldTag.after($newTag).remove();
+        $newTag.addClass('theme-loaded').trigger('theme-loaded');
+      });
+    });
+  };
+
+  //Initialise the gallery
+  window.showThemeGallery = function(imgs, loadingCont, imageToRemove) {
+    //Loading spinner
+    $(loadingCont).children().css('visibility', 'hidden');
+    $(loadingCont).spin(smallSpinnerOpts);
+
+    // Remove any existing galleries
+    $('#theme-gallery').remove();
+
+    //Create markup
+    var $gallery = $([
+      '<div id="theme-gallery" class="theme-modal">',
+        '<div class="theme-gallery">',
+          '<div class="theme-viewport swiper-container">',
+            '<div class="theme-images swiper-wrapper">',
+            '</div>',
+          '</div>',
+          '<div class="swiper-scrollbar"></div>',
+          '<div class="theme-thumbs"></div>',
+        '</div>',
+      '</div>'].join('')
+    ).appendTo($('body'));
+    var $images = $gallery.find('.theme-images');
+    //Add each image
+    for(var i=0; i<imgs.length; i++) {
+      if(imageToRemove != imgs[i]) {
+        $('<div class="theme-img swiper-slide"/>').append($('<img/>').attr('src', imgs[i])).appendTo($images);
+      }
+    }
+    //Clone each image as thumbnail
+    $gallery.find('.theme-images').clone().attr('class', 'theme-thumbs-inner').appendTo($gallery.find('.theme-thumbs'))
+    .find('.theme-img').removeClass('swiper-slide')
+    .find('img').wrap('<a href="#"/>');
+
+    //Wait for images to load...
+    $gallery.imagesLoaded(function(){
+      //Show it
+      showThemeModal($gallery);
+      //Initialise it: http://www.idangero.us/sliders/swiper/api.php
+      var $swiperCont = $('#theme-gallery .swiper-container');
+
+      //Forcefully set container & image heights to fix plugin
+      $(window).off('.themeGalleryResize').on('doThemeGalleryResizeCheck.themeGalleryResize resize.themeGalleryResize', function(){
+        var h = $swiperCont.parent().height();
+        $swiperCont.height(h);
+        $swiperCont.find('img').height(h);
+      }).trigger('doThemeGalleryResizeCheck');
+      var swiperOpts = {
+        mode: 'horizontal',
+        loop: false,
+        slidesPerView: 'auto',
+        slidesPerViewFit: false,
+        resizeReInit: true,
+        /*centeredSlides: true,*/
+        cssWidthAndHeight: true,
+        calculateHeight: false,
+        freeMode: true,
+        freeModeFluid: true,
+        scrollContainer: true,
+        grabCursor: true,
+        createPagination: false
+      };
+      if(!$('html').hasClass('ie8')) {
+        $.extend(swiperOpts, { scrollbar: {
+          container : '.swiper-scrollbar',
+          draggable : false,
+          hide: false,
+          snapOnRelease: true
+        }});
+      }
+      var swiper = $swiperCont.swiper(swiperOpts);
+      //Thumbnail events
+      $('#theme-gallery .theme-thumbs').on('click', 'a', function(){
+        swiper.swipeTo($(this).parent().index(), 1000);
+        return false;
+      });
+      //Remove spinner
+      $(loadingCont).spin(false).children().css('visibility', '');
+    });
+  };
+
+  /// Any slideshows?
+  var defaultFlexsliderOpts = {
+    controlNav: false
+  };
+  $('.flexslider').flexslider(defaultFlexsliderOpts);
+
+
+  //Show a quick generic text popup above an element
+  window.showQuickPopup = function(message, $origin){
+    var $popup = $('<div class="simple-popup"/>');
+    var offs = $origin.offset();
+    $popup.html(message).css({ 'left':offs.left, 'top':offs.top }).hide();
+    $('body').append($popup);
+    $popup.css('margin-top', - $popup.outerHeight() - 10);
+    $popup.fadeIn(200).delay(3500).fadeOut(400, function(){
+      $(this).remove();
+    });
+  };
+
+  //General lightbox for all
+  $('a[rel=lightbox]').colorbox();
+
+  //Immmediately select contents when focussing on some inputs
+  $(document).on('focusin click', 'input.select-on-focus', function(){
+    $(this).select();
+  }).on('mouseup', 'input.select-on-focus', function(e){
+    e.preventDefault(); //Prevent mouseup killing select()
+  });
+
+  //Textareas increase size as you type
+  $('#template textarea').each(function(){ $(this).autogrow({animate:false, onInitialize:true}) });
+
+  //Fill a template with a Shopify product
+  $.fn.fillWithShopifyProduct = function(){
+    return $(this).each(function(){
+      //Which prod we gettin' & where we puttin' it?
+      var handle = $(this).data('fill-with-product');
+      var $replaceTarget = $(this).find('script[type="text/template"]');
+      var template = $replaceTarget.html();
+      //Fetch data!
+      $.getJSON('/products/' + handle + '.json', function(data){
+        var product = data.product;
+        //Flat vals first
+        for(var key in product) {
+          template = template.replace(new RegExp('\\[' + key + '\\]', 'ig'), product[key]);
+        }
+        //Images, e.g. "[img:compact]"
+        var lastDot = product.image.src.lastIndexOf('.');
+        template = template.replace(/\[img:([a-z]*)\]/ig, product.image.src.slice(0, lastDot) + '_$1' + product.image.src.slice(lastDot));
+        //Actual insertion
+        $replaceTarget.replaceWith(template);
+      });
+    });
+  };
+  $('[data-fill-with-product]').fillWithShopifyProduct();
+
+
+  //Ajax add-to-cart
+  var shopifyAjaxAddURL = '/cart/add.js';
+  var shopifyAjaxCartURL = '/cart.js';
+  var shopifyAjaxStorePageURL = '/search';
+
+  $(document).on('click', 'form[action="/cart/add"]:not(.noAJAX, .feedback-go_to_cart) button', function(e) {
+    var $form = $(this).closest('form');
+
+    //Disable add button
+    var $btn = $(this).attr('disabled', 'disabled').addClass('confirmation');
+    var $icon = $btn.find('.icon');
+    $icon.data('original', $icon.html());
+    $icon.children().css('visibility', 'hidden');
+    $icon.spin(smallSpinnerOpts);
+
+    //Add to cart
+    $.post(shopifyAjaxAddURL, $form.serialize(), function(itemData) {
+      //Enable add button
+      $icon.spin(false).html('<i class="icon-tick"></i>');
+      setTimeout(function(){
+        $btn.removeAttr('disabled').removeClass('confirmation');
+        $icon.html($icon.data('original'));
+      }, 5000);
+
+      if($form.hasClass('feedback-add_in_modal')) {
+        showThemeModal([
+          '<div id="added-to-cart" class="theme-modal align-centre top-padded">',
+          '<div class="inner">',
+          '<div class="container">',
+          '<h4>' + $. parseJSON(itemData).title + '</h4>',
+          '<p>was added to your cart</p>',
+          '<p class="content-row"><a class="circled-icon" href="#" data-modal-close><i class="icon-bag2"><i class="icon-tick"></i></i></a></p>',
+          '<p class="links"><a href="#" data-modal-close>Continue shopping</a> &bull; <a href="/cart">Checkout</a></p>',
+          '</div>',
+          '</div>',
+          '</div>'
+        ].join(''));
+      }
+
+      //Update header summary
+      $.get(shopifyAjaxStorePageURL, function(data){
+        var cartSummarySelector = '#site-control .cart';
+        var $newCartObj = $($.parseHTML('<div>' + data + '</div>')).find(cartSummarySelector);
+        var $currCart = $(cartSummarySelector);
+        $currCart.replaceWith($newCartObj);
+      });
+    }, 'text').error(function(data) {
+      //Enable add button
+      $btn.removeAttr('disabled').removeClass('confirmation');
+      $icon.spin(false).children().css('visibility', '');
+
+      //Not added, show message
+      if(typeof(data) != 'undefined' && typeof(data.status) != 'undefined') {
+        var jsonRes = $.parseJSON(data.responseText);
+        window.showQuickPopup(jsonRes.description, $btn);
+      } else {
+        //Some unknown error? Disable ajax and submit the old-fashioned way.
+        $form.addClass('noAJAX');
+        $form.submit();
+      }
+    });
+    return false;
+  });
+
+  /// Product columns
+  $('.jiggly-split:not(rows-)').on('columnflow', function(){
+    var $oldCols = $(this).children('.column');
+    var $products = $(this).find('.product-block').sort(function(a,b){ return $(a).data('loop-index') - $(b).data('loop-index') });
+
+    var numNewCols = 0;
+    if($(this).hasClass('dynamic-col-2')) numNewCols = 2;
+    if($(this).hasClass('dynamic-col-3')) numNewCols = 3;
+    if($(this).hasClass('dynamic-col-4')) numNewCols = 4;
+
+    //Override with media query CSS
+    if($(this).css('min-height') == '1px') {
+      numNewCols = 0;
+    }
+
+    if(numNewCols != $(this).data('prevColCount')) {
+      if(numNewCols == 0) {
+        $(this).append($products);
+      } else {
+        //Create each column
+        var newCols = [];
+        for(var i=0; i<numNewCols; i++) {
+          var widthClass;
+          if(numNewCols == 2) widthClass = 'half';
+          if(numNewCols == 3) widthClass = 'third';
+          if(numNewCols == 4) widthClass = 'quarter';
+          newCols.push( $('<div class="column"/>').addClass(widthClass).addClass('col-' + (i+1)).appendTo(this) );
+        }
+        //Fill them up based on height of each col
+        $products.each(function(){
+          //Get shortest
+          var $shortestCol = $(newCols[0]);
+          var shortestHeight = $shortestCol.height();
+          var it = 0;
+          for(var j=1; j<newCols.length; j++) {
+            it = j;
+            var thisHeight = $(newCols[j]).height();
+            if(thisHeight < shortestHeight) {
+              $shortestCol = $(newCols[j]);
+              shortestHeight = thisHeight;
+            }
+          }
+          $shortestCol.append(this);
+        });
+      }
+      $oldCols.remove();
+      $(this).data('prevColCount', numNewCols);
+    }
+  }).on('forcecolumnflow', function(){
+    $(this).removeData('prevColCount').trigger('columnflow');
+  }).trigger('columnflow').imagesLoaded(function(){
+    //You only get a proper layout after the images have loaded
+    $('.jiggly-split').trigger('forcecolumnflow');
+  });
+  $(window).resize(function(){
+    $('.jiggly-split').trigger('columnflow');
+  });
+
+  /// Pagination-replacement
+  $('.pagination.infiniscroll').each(function(){
+    var waitForTrigger = $(this).hasClass('wait-for-trigger');
+    var $pager = $('<div class="pager-button"><a href="#"><i class="icon-arrow4-down"></i></a></div>');
+    $(this).replaceWith($pager);
+    $pager.find('a').attr('href', $(this).find('.next a').attr('href'));
+
+    $pager.on('click', 'a', function(e){
+      if($(this).hasClass('loading')) {
+        return false;
+      }
+      //Show spinner
+      $(this).addClass('loading').children().css('visibility', 'hidden');
+      $(this).spin(spinnerOpts);
+      //Load next page
+      var $link = $(this);
+      $.get($(this).attr('href'), function(data){
+        var $data = $($.parseHTML(data));
+        //Grab products & insert into page
+        var indexOffset = $('.product-list .product-block').length;
+        var $newProducts = $data.find('.product-list .product-block, .product-list .er').hide().appendTo('.product-list').filter('.product-block').each(function(index){
+          $(this).removeAttr('data-loop-index').data('loop-index', indexOffset + index);
+        });
+
+        //Sort by offset from the top
+        $newProducts.imagesLoaded(function(instance){
+          //Fix height
+          $('.product-list').height($('.product-list').height());
+
+          //Prep entry transitions
+          $newProducts.addClass('pre-trans-hidden').css('display', '');
+          $newProducts.siblings('.er').css('display', '');
+
+          //Put everything in new column layout
+          $('.jiggly-split').trigger('forcecolumnflow');
+
+          //Find total height to slide to
+          var newHeight = 0;
+          $('.product-list').children().each(function(){
+            var h = $(this).position().top + $(this).height();
+            if(h > newHeight) newHeight = h;
+          });
+
+          //Slide down, reveal & prep for more
+          $('.product-list').animate({height:newHeight}, 500, function(){
+            $(this).css('height', '');
+
+            //At this point, we're ready to transition in & load more
+            $newProducts.staggerEvent(function(el){
+              $(el).removeClass('pre-trans-hidden');
+            }, 150);
+
+            //Spin no more
+            var $next = $data.find('.pagination .next a');
+            if($next.length == 0) {
+              //We are out of products
+              $link.spin(false); //Tidy
+              $pager.html('<span class="no-more">'+{{ settings.txt_noprods_inf | escape | json }}+'</span>').fadeOut(5000);
+            } else {
+              //More to show
+              $link.attr('href', $next.attr('href')).spin(false).removeClass('loading').children().css('visibility', '');
+            }
+          });
+        });
+      });
+      return false;
+    });
+    if(!waitForTrigger) {
+      //Infiniscroll
+      $(window).on('scroll', function(){
+        if($(window).scrollTop() + $(window).height() > $pager.offset().top) {
+          $pager.find('a').trigger('click');
+        }
+      });
+    }
+  });
+
+  /// Redirection dropdowns
+  $('select.redirecter').on('change', function(){
+    window.location = $(this).val();
+  });
+
+  /// Collection sorting. Code courtesy of the reliably-awesome Caroline: https://gist.github.com/carolineschnapp/11352987
+  var $sortBy = $('#sort-by');
+  if($sortBy.length > 0) {
+    Shopify.queryParams = {};
+    if (location.search.length) {
+      for (var aKeyValue, i = 0, aCouples = location.search.substr(1).split('&'); i < aCouples.length; i++) {
+        aKeyValue = aCouples[i].split('=');
+        if (aKeyValue.length > 1) {
+          Shopify.queryParams[decodeURIComponent(aKeyValue[0])] = decodeURIComponent(aKeyValue[1]);
+        }
+      }
+    }
+    $sortBy.val($sortBy.data('initval')).bind('change', function() {
+      Shopify.queryParams.sort_by = $(this).val();
+      location.search = $.param(Shopify.queryParams);
+    });
+  }
+
+  /// Visual style of dropdowns
+  $('select:not(#product-select)').selectReplace().closest('.selector-wrapper').addClass('has-pretty-select');
+
+  ///For IE8 fonts on first-load
+  if($('html').hasClass('ie8')) {
+    var head = document.getElementsByTagName('head')[0],
+        style = document.createElement('style');
+    style.type = 'text/css';
+    style.styleSheet.cssText = ':before,:after{content:none !important';
+    head.appendChild(style);
+    setTimeout(function(){
+      head.removeChild(style);
+    }, 0);
+  }
+
+  ///Link blog excerpt images to article
+  $('.template-blog .articles .article .rte img').filter(function(){
+    return $(this).closest('a').length == 0 //Remove any already in an anchor
+  }).wrap(function(){
+    return $('<a/>').attr('href', $(this).closest('.article').find('.title a').attr('href'));
+  });
+
+  ///General links that could be for modals
+  $(document).on('click', 'a[href^=#]:not([data-modal-toggle])', function(){
+    //Is this for a modal?
+    var $modal = $($(this).attr('href')).filter('.theme-modal');
+    if($modal.length) {
+      //Convert into a modal-link and click again
+      $(this).attr('data-modal-toggle', $(this).attr('href')).click();
+      return false;
+    }
+  });
+});
